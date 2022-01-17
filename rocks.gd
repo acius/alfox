@@ -4,14 +4,20 @@ extends Node2D
 # efficient than using instancing and nodes, but requires more programming and
 # is less visual. Bullets are managed together in the `bullets.gd` script.
 
-const ROCK_COUNT = 30
-const SPEED_MIN = 320
-const SPEED_MAX = 320
+const ROCK_COUNT = 64
+const ROCK_SPEED = 320
+const ROCK_X_GRID = 192
+const ROCK_Y_GRID = 128
+
+const SKY_HEIGHT = 2
 
 const rock_image = preload("res://rock.png")
 
+const thunk_sound = preload("res://Thunk.wav")
+
 var rocks = []
 var shape
+var rows = []
 
 
 class Rock:
@@ -22,18 +28,25 @@ class Rock:
 	# faster to use RIDs compared to a high-level approach.
 	var body = RID()
 
+func nexty():
+	if rows.empty():
+		for i in range( 2, floor( get_viewport_rect().size.y / ROCK_Y_GRID ) + 1 ):
+			rows.push_back( i )
+		rows.shuffle()
+	var result = rows[-1]
+	rows.pop_back()
+	return result
 
 func _ready():
 	randomize()
 
 	shape = Physics2DServer.circle_shape_create()
 	# Set the collision shape's radius for each rock in pixels.
-	Physics2DServer.shape_set_data(shape, 8)
+	Physics2DServer.shape_set_data(shape, 48)
 
 	for _i in ROCK_COUNT:
 		var rock = Rock.new()
 		# Give each rock its own speed.
-		rock.speed = rand_range(SPEED_MIN, SPEED_MAX)
 		rock.body = Physics2DServer.body_create()
 
 		Physics2DServer.body_set_space(rock.body, get_world_2d().get_space())
@@ -46,9 +59,10 @@ func _ready():
 		# Place rocks randomly on the viewport and move rocks outside the
 		# play area so that they fade in nicely.
 		rock.position = Vector2(
-			(floor(rand_range(0, get_viewport_rect().size.x / 20 )) * 40) + get_viewport_rect().size.x,
-			floor(rand_range(0, get_viewport_rect().size.y / 40)) * 40 + 20
+			get_viewport_rect().size.x + _i * ROCK_X_GRID,
+			nexty() * ROCK_Y_GRID
 		)
+		rock.speed = ROCK_SPEED
 		var transform2d = Transform2D()
 		transform2d.origin = rock.position
 		Physics2DServer.body_set_state(rock.body, Physics2DServer.BODY_STATE_TRANSFORM, transform2d)
@@ -63,15 +77,9 @@ func _process(_delta):
 
 func _physics_process(delta):
 	var transform2d = Transform2D()
-	var offset = floor( get_viewport_rect().size.x / 40 ) * 40
+	#var offset = floor( get_viewport_rect().size.x / ROCK_X_GRID ) * ROCK_X_GRID
 	for rock in rocks:
 		rock.position.x -= rock.speed * delta
-
-		if rock.position.x < -40:
-			# The rock has left the screen; move it back to the right.
-			rock.position.x += 2 * offset
-			rock.position.y = floor(rand_range(0, get_viewport_rect().size.y / 40)) * 40 + 20
-
 		transform2d.origin = rock.position
 
 		Physics2DServer.body_set_state(rock.body, Physics2DServer.BODY_STATE_TRANSFORM, transform2d)

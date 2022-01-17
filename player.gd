@@ -18,24 +18,26 @@ onready var sprite = $AnimatedSprite
 
 
 func _input(event):
-	if event is InputEventMouseMotion:
+	if (event is InputEventMouseMotion) and (death_cooldown < 1):
 		position = event.position
-		position.y = floor( position.y / 40 ) * 40 + 20
-
+		position.y = floor( 0.5 + position.y / 128 ) * 128
+		if position.y < 256:
+			position.y = 256
 
 func _on_body_shape_entered(_body_id, _body, _body_shape, _local_shape):
 	touching += 1
-	if touching >= 1:
-		sprite.animation = "explode"
-		if death_cooldown < 1:
-			death_cooldown = 1
+	if touching >= 1 and death_cooldown < 1:
+		if !$ThunkPlayer.playing:
+			$ThunkPlayer.play()
+		sprite.animation = "hurt"
+		death_cooldown = 1
 		
 func _physics_process(_delta):
 	if death_cooldown > 0:
 		death_cooldown += 1
 		sprite.frame = death_cooldown / 3
 	if death_cooldown > 63:
-		get_tree().change_scene("res://title.tscn")
+		var _dontcare = get_tree().change_scene("res://title.tscn")
 		
 
 func _on_body_shape_exited(_body_id, _body, _body_shape, _local_shape):

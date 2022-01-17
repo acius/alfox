@@ -11,4 +11,4 @@ func _ready():
 	pass
 
 func on_StartButton_pressed():
-	get_tree().change_scene("res://run.tscn")
+	var _dontcare = get_tree().change_scene("res://run.tscn")
