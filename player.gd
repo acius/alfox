@@ -11,7 +11,9 @@ var death_cooldown = 0
 onready var sprite = $AnimatedSprite
 
 
-#func _ready():
+func _ready():
+	sprite.animation = "default"
+	sprite.playing = true
 	# The player follows the mouse cursor automatically, so there's no point
 	# in displaying the mouse cursor.
 	#Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
@@ -25,12 +27,13 @@ func _input(event):
 			position.y = 256
 
 func _on_body_shape_entered(_body_id, _body, _body_shape, _local_shape):
-	touching += 1
-	if touching >= 1 and death_cooldown < 1:
+	if _body_id != Common.den_body and death_cooldown < 1:
 		if !$ThunkPlayer.playing:
 			$ThunkPlayer.play()
 		sprite.animation = "hurt"
 		death_cooldown = 1
+	if _body_id == Common.den_body:
+		var _dontcare = get_tree().change_scene("res://inside_den.tscn")
 		
 func _physics_process(_delta):
 	if death_cooldown > 0:

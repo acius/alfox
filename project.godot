@@ -19,6 +19,10 @@ config/description="The adventure of Alfox"
 run/main_scene="res://title.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Common="*res://scripts/common.gd"
+
 [display]
 
 window/size/width=1920
