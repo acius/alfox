@@ -16,7 +16,7 @@ _global_script_class_icons={
 
 config/name="Alfox"
 config/description="The adventure of Alfox"
-run/main_scene="res://title.tscn"
+run/main_scene="res://run.tscn"
 config/icon="res://icon.png"
 
 [autoload]
